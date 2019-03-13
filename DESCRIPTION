@@ -1,0 +1,16 @@
+Package: exforParser
+Type: Package
+Title: Extract The Information from an EXFOR entry
+Version: 0.1
+Date: 2019-03-12
+Author: Georg Schnabel
+Maintainer: Georg Schnabel <georg.schnabel@nucleardata.com>
+Description: This package parses an EXFOR entry given as
+             a character string and returns a nested 
+             list containing all the information of the
+             EXFOR entry. This list can in turn be 
+             converted to a JSON object for convenient
+             export to other analysis environments. 
+License: GPL (>= 3)
+Imports: Rcpp (>= 0.12.19)
+LinkingTo: Rcpp

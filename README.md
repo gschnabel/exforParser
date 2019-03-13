@@ -30,20 +30,26 @@ library(exforParser)
 # read an EXFOR entry from a file into a character string
 # exforFilePath can be replaced by a hard-coded string pointing to
 # some other file containing an EXFOR entry
+
 exforFilePath <- system.file("extdata", "entry_20917.txt", package="exforParser")
+
 # An alternative EXFOR entry for exploration: 
 # exforFilePath <- system.file("extdata", "entry_22871.txt", package="exforParser")
+
 exforEntry <- paste0(readLines(exforFilePath), collapse="\n")
 
 # extract the information from the character string
 # and convert it to a nested list 
+
 exforList <- parseEntry(exforEntry)
 ```
+All EXFOR entries (the complete EXFOR database) can be downloaded from
+<http://www.nucleardata.com>.
 
 The variable `exforList` is a nested list which gives convenient
 access to the various fields of the EXFOR entry.
-Here are some examplary commands that show how information
-about an EXFOR entry can be retrieved:
+Here are some exemplary commands that show how information
+of an EXFOR entry can be accessed:
 
 ```
 # show names of the top-level elements
@@ -98,5 +104,6 @@ function `transformSubent`:
 ```
 transfSubent <- transformSubent(exforList$SUBENT[[1]], exforList$SUBENT[[2]])
 ```
-
+The first argument has to be the first subentry and the second argument
+can be any of the subsequent subentries.
 

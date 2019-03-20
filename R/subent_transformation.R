@@ -81,6 +81,7 @@ transformSubent <- function(firstSub,curSub) {
   # add meta information
   curSub$META <- list()
 
+  shouldPrintDebug <- FALSE
   tryRes <- try({
     reacInfo <- parseReactionStr(curSub)
     if (!is.null(reacInfo)) {
@@ -95,8 +96,8 @@ transformSubent <- function(firstSub,curSub) {
         curSub$META$TARGET$nat <- 1
       }
     }
-  })
-  if (class(tryRes)=="try-error") {
+  }, silent = !shouldPrintDebug)
+  if ("try-error" %in% class(tryRes) && shouldPrintDebug) {
     print(curSub$BIB$REACTION)
   }
 

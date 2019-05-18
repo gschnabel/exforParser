@@ -143,20 +143,26 @@ Rcpp::CharacterVector parseGenericNLB(std::string &line, std::istringstream &f) 
   return(combRes);
 }
 
-Rcpp::CharacterVector parseREAC(std::string &line, std::istringstream &f) {
+Rcpp::CharacterVector parseBIBfield(std::string &line, std::istringstream &f) {
 
   std::string firstField = getFirstField(line);
-  if (firstField.compare("REACTION")!=0)
-    throw std::invalid_argument("REACTION handler cannot parse this block starting with: " + line);
+  std::string baseFirstField = firstField;
+  if (firstField.size() == 0)
+    throw std::invalid_argument("Expected non-empty first field in line: " + line);
   
 
   CharacterVector origVec = parseGenericNLB(line,f);
   CharacterVector combRes;
   combRes.push_back(Rcpp::as<std::string>(origVec));
 
+  
   do {
     firstField = getField(line,1);
-    if (firstField.length()<11) break; // NOCOMMON block after REAC has only 8 characters
+    // NOCOMMON block after REAC has only 8 characters
+    if (firstField.length()<11) break; 
+    // otherwise we merge new fields also having an index into the previous one 
+    if (trim(firstField.substr(0,10)).size() > 0) break;
+
     if (firstField.at(10) >= '0' && firstField.at(10) <= '9') {
       combRes.push_back(Rcpp::as<std::string>(parseGenericNLB(line,f)));
     } else break;
@@ -198,18 +204,12 @@ Rcpp::List parseBib(std::string &line, std::istringstream &f) {
   //std::cout << "first field " << firstField << std::endl;
   while(!f.eof()) {
     firstField = getFirstField(line);
-    if (firstField.compare("AUTHOR")==0)
-      resList[firstField] = parseGenericNLB(line,f);
-    else if (firstField.compare("REACTION")==0)
-      resList[firstField] = parseREAC(line,f);
-    else if (firstField.compare("ENDBIB")!=0)
-      resList[firstField] = parseGenericNLB(line,f);
-    else if (firstField.compare("ENDBIB")==0) {
+    if (firstField.compare("ENDBIB")!=0)
+      resList[firstField] = parseBIBfield(line,f);
+    else {
       getline(f,line);
       break;
     } 
-    else
-      getline(f,line);
   }
   
   return resList;

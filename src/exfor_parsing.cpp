@@ -147,7 +147,7 @@ Rcpp::CharacterVector parseGenericNLB(std::string &line, std::istringstream &f) 
   CharacterVector origVec = parseGeneric(line,f);
   std::string combRes("");
   for (int i=0; i<origVec.size(); i++)
-    combRes += " " + origVec[i];
+    combRes += "\n" + origVec[i];
   combRes.erase(0,1);
   return(combRes);
 }

@@ -68,9 +68,18 @@ bool existField(std::string &line, int pos) {
 }
 
 std::string getFirstField(std::string &line) {
-  
   std::string fieldName = getField(line,1);
-  return trim(fieldName);
+  return trim(fieldName.substr(0,10));
+}
+
+std::string getFirstPointer(std::string &line) {
+  std::string fieldstr = getField(line,1);
+  if (fieldstr.size()<11)
+    return std::string("");
+  else if (fieldstr.substr(10,1)==" ")
+    return std::string("");
+  else
+    return fieldstr.substr(10,1);
 }
 
 std::string getAfterFirst(std::string &line) {
@@ -122,8 +131,8 @@ Rcpp::CharacterVector parseGeneric(std::string &line, std::istringstream &f) {
   bool firstLine = true;
   CharacterVector resVec;
   while (!f.eof()) {
-    //std::cout << "--- " << getFirstField(line) << std::endl;
-    if (!firstLine && getFirstField(line).size()>0) {
+    if (!firstLine && 
+        (getFirstField(line).size()>0 || getFirstPointer(line).size()>0)) {
       break;
     }
     firstLine = false;
@@ -147,27 +156,12 @@ Rcpp::CharacterVector parseBIBfield(std::string &line, std::istringstream &f) {
 
   std::string firstField = getFirstField(line);
   std::string baseFirstField = firstField;
-  if (firstField.size() == 0)
+  if (firstField.size() == 0 && getFirstPointer(line).size()==0)
     throw std::invalid_argument("Expected non-empty first field in line: " + line);
   
-
   CharacterVector origVec = parseGenericNLB(line,f);
   CharacterVector combRes;
   combRes.push_back(Rcpp::as<std::string>(origVec));
-
-  
-  do {
-    firstField = getField(line,1);
-    // NOCOMMON block after REAC has only 8 characters
-    if (firstField.length()<11) break; 
-    // otherwise we merge new fields also having an index into the previous one 
-    if (trim(firstField.substr(0,10)).size() > 0) break;
-
-    if (firstField.at(10) >= '0' && firstField.at(10) <= '9') {
-      combRes.push_back(Rcpp::as<std::string>(parseGenericNLB(line,f)));
-    } else break;
-  } while (!f.eof());
-
   return(combRes);
 }
 
@@ -195,21 +189,34 @@ Rcpp::List parseBib(std::string &line, std::istringstream &f) {
   Rcpp::List resList;
   
   std::string firstField = getFirstField(line);
+  std::string fullFieldName = "";
+  std::string previousField = "";
+  std::string firstPointer = "";
   if (firstField.compare("BIB")!=0)
     throw std::invalid_argument("BIB handler cannot parse this block starting with: " + line);
   
   int numElements = getIntField(line,2);
   int numRows = getIntField(line,3);
   getline(f,line);
-  //std::cout << "first field " << firstField << std::endl;
   while(!f.eof()) {
     firstField = getFirstField(line);
-    if (firstField.compare("ENDBIB")!=0)
-      resList[firstField] = parseBIBfield(line,f);
-    else {
+    if (firstField.compare("NOCOMMON") == 0)
+      continue;
+    if (firstField.compare("") == 0 && previousField.compare("") != 0)
+      firstField = previousField;
+    
+    fullFieldName = firstField;
+    firstPointer = getFirstPointer(line);
+    if (firstPointer.compare("") != 0)
+      fullFieldName += "#" + firstPointer;
+    
+    if (firstField.compare("ENDBIB")!=0) {
+      resList[fullFieldName] = parseBIBfield(line,f);
+    } else {
       getline(f,line);
       break;
-    } 
+    }
+    previousField = firstField;
   }
   
   return resList;
@@ -248,7 +255,7 @@ Rcpp::List parseDataAndCommon(std::string &line, std::istringstream &f) {
     curField = getField(line,elCount);
     trimmedField = trim(curField);
     if (curField.size()==11 && curField.at(10) != ' ') {
-      trimmedField += '-';
+      trimmedField += '#';
       trimmedField += curField.at(10);
     }
     fieldDescr.push_back(trimmedField);

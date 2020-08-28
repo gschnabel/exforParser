@@ -68,6 +68,10 @@ transformSubent <- function(firstSub,curSub) {
     names(curSub$DATA$TABLE) <- curSub$DATA$DESCR
   }
 
+  # convert the TABLE back to a matrix
+  # because it was also a matrix before the transformation
+  curSub$DATA$TABLE <- as.matrix(curSub$DATA$TABLE)
+
   # convert the units to a list
   if (!is.null(curSub$DATA)) {
     names(curSub$DATA$UNIT) <- curSub$DATA$DESCR

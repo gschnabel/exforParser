@@ -68,9 +68,11 @@ transformSubent <- function(firstSub,curSub) {
     names(curSub$DATA$TABLE) <- curSub$DATA$DESCR
   }
 
-  # convert the TABLE back to a matrix
-  # because it was also a matrix before the transformation
-  curSub$DATA$TABLE <- as.matrix(curSub$DATA$TABLE)
+  # introduce nodrop attribute that ensures
+  # that even one-element vectors are enclosed
+  # in brackets during conversion to JSON
+  for (curcolname in names(curSub$DATA$TABLE))
+    attr(curSub$DATA$TABLE[[curcolname]], "nodrop") <- TRUE
 
   # convert the units to a list
   if (!is.null(curSub$DATA)) {

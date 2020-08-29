@@ -412,13 +412,15 @@ std::string basicToStr(SEXP Rval) {
       return res;
     } else {
       NumericVector tmp(Rval);
-      if (tmp.size()>1) res += "[ ";
+      if (tmp.size()>1 || RObject(Rval).hasAttribute("nodrop"))
+        res += "[ ";
       for (NumericVector::iterator it = tmp.begin(); 
            it != tmp.end(); ++it) {
         res += numToJSON(*it) + std::string(", ");
       }
       res.erase(res.size()-2,1);
-      if (tmp.size()>1) res += std::string("]");
+      if (tmp.size()>1 || RObject(Rval).hasAttribute("nodrop")) 
+        res += std::string("]");
       return res;
     }
   }
@@ -439,26 +441,30 @@ std::string basicToStr(SEXP Rval) {
       return res;
     } else {
       IntegerVector tmp(Rval);
-      if (tmp.size()>1) res += "[ ";
+      if (tmp.size()>1 || RObject(Rval).hasAttribute("nodrop"))
+        res += "[ ";
       for (IntegerVector::iterator it = tmp.begin(); 
            it != tmp.end(); ++it) {
         res += numToJSON(*it) + std::string(", ");
       }
       res.erase(res.size()-2,1);
-      if (tmp.size()>1) res += std::string("]");
+      if (tmp.size()>1 || RObject(Rval).hasAttribute("nodrop"))
+        res += std::string("]");
       return res;
     }
   }
   case STRSXP: {
     CharacterVector tmp(Rval);
-    if (tmp.size()>1) res += "[ ";
+    if (tmp.size()>1 || RObject(Rval).hasAttribute("nodrop"))
+      res += "[ ";
     for (CharacterVector::iterator it = tmp.begin(); 
          it != tmp.end(); ++it) {
       std::string tmp2 = Rcpp::as<std::string>(*it);
       res += std::string("\"") + escape_json(tmp2) + std::string("\"") + std::string(", ");
     }
     res.erase(res.size()-2,1);
-    if (tmp.size()>1) res += std::string("]");
+    if (tmp.size()>1 || RObject(Rval).hasAttribute("nodrop"))
+      res += std::string("]");
     return res;
   }
   }

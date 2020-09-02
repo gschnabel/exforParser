@@ -1,7 +1,7 @@
 Package: exforParser
 Type: Package
 Title: Extract The Information from an EXFOR entry
-Version: 0.1.0
+Version: 0.2.0
 Date: 2019-03-12
 Author: Georg Schnabel
 Maintainer: Georg Schnabel <georg.schnabel@nucleardata.com>
